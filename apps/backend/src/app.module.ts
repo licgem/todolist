@@ -6,6 +6,7 @@ import configuration from './config/configuration';
 import { HealthModule } from './health/health.module';
 import { UsersModule } from './users/users.module';
 import { UploadModule } from './upload/upload.module';
+import { TodosModule } from './todos/todos.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { UploadModule } from './upload/upload.module';
     HealthModule,
     UsersModule,
     UploadModule,
+    TodosModule,
   ],
   providers: [
     // Apply rate limiting globally
