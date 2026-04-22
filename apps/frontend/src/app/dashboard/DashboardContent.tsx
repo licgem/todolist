@@ -197,47 +197,6 @@ export default function DashboardContent({
       </header>
 
       <div className="max-w-5xl mx-auto px-6 py-8 space-y-8">
-        {/* API Status Section */}
-        <section className="bg-surface rounded-xl border border-border p-6">
-          <div className="flex items-center justify-between mb-5">
-            <div>
-              <h2 className="text-lg font-heading font-semibold">API Status</h2>
-              <p className="text-sm text-text-secondary mt-0.5">
-                Backend API 연결 상태를 확인합니다
-              </p>
-            </div>
-            <button
-              onClick={refreshAll}
-              className="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-dark transition-colors"
-            >
-              Refresh
-            </button>
-          </div>
-
-          <div className="space-y-3">
-            {apiStatuses.map((api) => (
-              <div
-                key={api.endpoint}
-                className="flex items-center justify-between p-4 rounded-lg border border-border bg-background"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <code className="text-xs text-text-secondary bg-surface px-2 py-1 rounded border border-border shrink-0">
-                    GET {api.endpoint}
-                  </code>
-                  <span className="text-sm font-medium truncate">{api.label}</span>
-                </div>
-
-                <div className="flex items-center gap-3 shrink-0">
-                  {api.latency !== undefined && (
-                    <span className="text-xs text-text-secondary">{api.latency}ms</span>
-                  )}
-                  <StatusBadge status={api.status} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
         {/* File Upload Section */}
         <section className="bg-surface rounded-xl border border-border p-6">
           <div className="mb-5">
@@ -335,6 +294,47 @@ export default function DashboardContent({
                 onDelete={handleDeleteTodo}
               />
             )}
+          </div>
+        </section>
+
+        {/* API Status Section */}
+        <section className="bg-surface rounded-xl border border-border p-6">
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <h2 className="text-lg font-heading font-semibold">API Status</h2>
+              <p className="text-sm text-text-secondary mt-0.5">
+                Backend API 연결 상태를 확인합니다
+              </p>
+            </div>
+            <button
+              onClick={refreshAll}
+              className="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-dark transition-colors"
+            >
+              Refresh
+            </button>
+          </div>
+
+          <div className="space-y-3">
+            {apiStatuses.map((api) => (
+              <div
+                key={api.endpoint}
+                className="flex items-center justify-between p-4 rounded-lg border border-border bg-background"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <code className="text-xs text-text-secondary bg-surface px-2 py-1 rounded border border-border shrink-0">
+                    GET {api.endpoint}
+                  </code>
+                  <span className="text-sm font-medium truncate">{api.label}</span>
+                </div>
+
+                <div className="flex items-center gap-3 shrink-0">
+                  {api.latency !== undefined && (
+                    <span className="text-xs text-text-secondary">{api.latency}ms</span>
+                  )}
+                  <StatusBadge status={api.status} />
+                </div>
+              </div>
+            ))}
           </div>
         </section>
 
