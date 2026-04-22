@@ -3,6 +3,9 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { apiFetch, apiUpload } from '@/lib/api';
 import SignOutButton from './SignOutButton';
+import TodoForm from '@/components/todos/TodoForm';
+import TodoList from '@/components/todos/TodoList';
+import type { Todo } from '@vb/shared';
 
 interface ApiStatus {
   label: string;
@@ -41,6 +44,9 @@ export default function DashboardContent({
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
+  const [todos, setTodos] = useState<Todo[]>([]);
+  const [todosLoading, setTodosLoading] = useState(true);
+  const [todosError, setTodosError] = useState<string | null>(null);
 
   // Check a single API endpoint
   const checkApi = useCallback(async (index: number, endpoint: string) => {
@@ -75,6 +81,18 @@ export default function DashboardContent({
     API_LIST.forEach((api, i) => checkApi(i, api.endpoint));
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Load todos on mount
+  useEffect(() => {
+    apiFetch<Todo[]>('/todos', {}, accessToken).then((res) => {
+      if (res.success && res.data) {
+        setTodos(res.data);
+      } else {
+        setTodosError(res.error || 'Failed to load todos');
+      }
+      setTodosLoading(false);
+    });
+  }, [accessToken]);
+
   const refreshAll = useCallback(() => {
     setApiStatuses(API_LIST.map((a) => ({ ...a, status: 'checking' })));
     API_LIST.forEach((api, i) => checkApi(i, api.endpoint));
@@ -108,6 +126,37 @@ export default function DashboardContent({
       // ignore
     }
   }, []);
+
+  const handleAddTodo = useCallback(async (title: string) => {
+    const res = await apiFetch<Todo>('/todos', {
+      method: 'POST',
+      body: JSON.stringify({ title }),
+    }, accessToken);
+    if (res.success && res.data) {
+      setTodos((prev) => [res.data!, ...prev]);
+    }
+  }, [accessToken]);
+
+  const handleToggleTodo = useCallback(async (id: string, completed: boolean) => {
+    setTodos((prev) => prev.map((t) => (t.id === id ? { ...t, completed } : t)));
+    const res = await apiFetch<Todo>(`/todos/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ completed }),
+    }, accessToken);
+    if (!res.success) {
+      setTodos((prev) => prev.map((t) => (t.id === id ? { ...t, completed: !completed } : t)));
+    }
+  }, [accessToken]);
+
+  const handleDeleteTodo = useCallback(async (id: string) => {
+    setTodos((prev) => prev.filter((t) => t.id !== id));
+    const res = await apiFetch(`/todos/${id}`, { method: 'DELETE' }, accessToken);
+    if (!res.success) {
+      apiFetch<Todo[]>('/todos', {}, accessToken).then((r) => {
+        if (r.success && r.data) setTodos(r.data);
+      });
+    }
+  }, [accessToken]);
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
@@ -261,6 +310,32 @@ export default function DashboardContent({
               ))}
             </div>
           )}
+        </section>
+
+        {/* Todo List Section */}
+        <section className="bg-surface rounded-xl border border-border p-6">
+          <div className="mb-5">
+            <h2 className="text-lg font-heading font-semibold">Todo List</h2>
+            <p className="text-sm text-text-secondary mt-0.5">Manage your tasks</p>
+          </div>
+
+          <div className="space-y-4">
+            <TodoForm onAdd={handleAddTodo} />
+
+            {todosLoading ? (
+              <p className="text-sm text-text-secondary text-center py-6">Loading...</p>
+            ) : todosError ? (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
+                {todosError}
+              </div>
+            ) : (
+              <TodoList
+                todos={todos}
+                onToggle={handleToggleTodo}
+                onDelete={handleDeleteTodo}
+              />
+            )}
+          </div>
         </section>
 
         {/* Session Info */}

@@ -49,3 +49,13 @@ export const AUTH_ROUTES = {
 } as const;
 
 export const PROTECTED_ROUTES = ['/dashboard'] as const;
+
+/** A todo item */
+export interface Todo {
+  id: string;
+  user_id: string;
+  title: string;
+  completed: boolean;
+  created_at: string;
+  updated_at: string;
+}
